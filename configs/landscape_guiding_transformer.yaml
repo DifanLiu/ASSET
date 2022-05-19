@@ -1,0 +1,85 @@
+model:
+  base_learning_rate: 4.5e-07
+  target: asset.models.cond_transformer.Net2NetTransformer
+  params:
+    first_stage_key: image
+    cond_stage_key: segmentation
+    transformer_config:
+      target: asset.modules.transformer.asset.ASSET
+      params:
+        vocab_size: 1024
+        max_position_embeddings: 256
+        attention_dropout: 0.0
+        dropout: 0.0
+        encoder_layers: 7
+        decoder_layers: 15
+        PEG_list: ['E_all', 'D_0']
+        PEG_ks: 5
+        block_h: 16
+        block_w: 4
+    first_stage_config:
+      target: asset.models.vqgan.VQModel
+      params:
+        ckpt_path: <path to VQGAN>
+        embed_dim: 256
+        n_embed: 1024
+        legacy: True
+        ddconfig:
+          double_z: false
+          z_channels: 256
+          resolution: 256
+          in_channels: 3
+          out_ch: 3
+          ch: 128
+          ch_mult: [ 1,1,2,2,4]  # num_down = len(ch_mult)-1
+          num_res_blocks: 2
+          attn_resolutions: [16]
+          dropout: 0.0
+          conv_type: PartialConv
+          downsample_legacy: False
+          norm_type: RegionNorm
+        lossconfig:
+          target: asset.modules.losses.DummyLoss
+    cond_stage_config:
+      target: asset.models.vqgan.VQSegmentationModel
+      params:
+        ckpt_path: <path to landscape_VQ_seg_model.ckpt>
+        embed_dim: 256
+        n_embed: 1024
+        n_labels: 182
+        ddconfig:
+          double_z: false
+          z_channels: 256
+          resolution: 256
+          in_channels: 182
+          out_ch: 182
+          ch: 128
+          ch_mult: [ 1,1,2,2,4]  # num_down = len(ch_mult)-1
+          num_res_blocks: 2
+          attn_resolutions: [16]
+          dropout: 0.0
+        lossconfig:
+          target: asset.modules.losses.DummyLoss
+
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 24
+    num_workers: 12
+    train:
+      target: asset.data.landscape.CustomTrain
+      params:
+        training_images_list_file: data/landscape/train.txt
+        size: 256
+        dir_seg: data/landscape/seg/train_seg_256
+        base_dir: data/landscape/imgs
+        max_ratio: 0.6
+    validation:
+      target: asset.data.landscape.CustomTest
+      params:
+        test_images_list_file: data/landscape/test.txt
+        size: 256
+        dir_seg: data/landscape/seg/test_seg_256
+        base_dir: data/landscape/imgs
+        max_ratio: 0.6
+        size_dataset: 1024

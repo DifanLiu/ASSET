@@ -1,0 +1,28 @@
+the_seed: 64
+
+config_path: <path to landscape_1024.yaml>
+ckpt_path: <path to landscape_1024.ckpt>
+guiding_ckpt_path: <path to landscape_guiding.ckpt>
+
+NUMBER_BATCHES: 1
+NUMBER_SAMPLES: 2
+
+temperature: 1.0
+top_k: 100
+
+number_categories: 182
+categories_dict:
+  mountain: 134
+  None: -1
+  waterother: 177
+  rock: 149
+  snow: 158
+  road: 148
+  tree: 168
+  stone: 161
+  river: 147
+  grass: 123
+  clouds: 105
+  sea: 154
+  skyother: 156
+  flower: 118

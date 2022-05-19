@@ -1,0 +1,92 @@
+model:
+  base_learning_rate: 4.5e-07
+  target: asset.models.cond_transformer.Net2NetTransformer
+  params:
+    first_stage_key: image
+    cond_stage_key: segmentation
+    transformer_config:
+      target: asset.modules.transformer.asset.ASSET
+      params:
+        vocab_size: 8192
+        max_position_embeddings: 256
+        attention_dropout: 0.1
+        dropout: 0.1
+        encoder_layers: 7
+        decoder_layers: 15
+        PEG_list: ['E_all', 'D_0']
+        PEG_ks: 5
+        block_h: 16
+        block_w: 4
+    first_stage_config:
+      target: asset.models.vqgan.VQModel
+      params:
+        ckpt_path: <path to VQGAN>
+        embed_dim: 256
+        n_embed: 8192
+        legacy: True
+        ddconfig:
+          double_z: false
+          z_channels: 256
+          resolution: 256
+          in_channels: 3
+          out_ch: 3
+          ch: 128
+          ch_mult: [ 1,1,2,2,4]  # num_down = len(ch_mult)-1
+          num_res_blocks: 2
+          attn_resolutions: [16]
+          dropout: 0.0
+          conv_type: PartialConv
+          downsample_legacy: False
+          norm_type: RegionNorm
+        lossconfig:
+          target: asset.modules.losses.DummyLoss
+    cond_stage_config:
+      target: asset.models.vqgan.VQSegmentationModel
+      params:
+        ckpt_path: <path to coco_VQ_seg_model.ckpt>
+        embed_dim: 256
+        n_embed: 1024
+        n_labels: 183
+        ddconfig:
+          double_z: false
+          z_channels: 256
+          resolution: 256
+          in_channels: 183
+          out_ch: 183
+          ch: 128
+          ch_mult: [ 1,1,2,2,4]  # num_down = len(ch_mult)-1
+          num_res_blocks: 2
+          attn_resolutions: [16]
+          dropout: 0.0
+        lossconfig:
+          target: asset.modules.losses.DummyLoss
+
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 27
+    num_workers: 12
+    train:
+      target: asset.data.coco.CocoBase
+      params:
+        size: 296
+        crop_size: 256
+        random_crop: True
+        dataroot: 'data/coco/imgs/train2017'
+        datajson: 'data/coco/annotations/captions_train2017.json'
+        seg_dir: 'data/coco/cocostuffthings/train2017'
+        onehot_segmentation: True
+        use_stuffthing: True
+        duplicate_num: 4
+    validation:
+      target: asset.data.coco.CocoBase
+      params:
+        size: 256
+        crop_size: 256
+        random_crop: False
+        dataroot: 'data/coco/imgs/val2017'
+        datajson: 'data/coco/annotations/captions_val2017.json'
+        seg_dir: 'data/coco/cocostuffthings/val2017'
+        onehot_segmentation: True
+        use_stuffthing: True
+        size_dataset: 1024

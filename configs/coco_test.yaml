@@ -1,0 +1,15 @@
+the_seed: 32
+
+config_path: <path to coco_512.yaml>
+ckpt_path: <path to coco_512.ckpt>
+guiding_ckpt_path: <path to coco_guiding.ckpt>
+
+NUMBER_BATCHES: 1
+NUMBER_SAMPLES: 2
+
+temperature: 1.0
+top_k: 100
+
+number_categories: 183
+categories_dict:
+  pizza: 59
