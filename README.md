@@ -8,7 +8,7 @@ ACM Transactions on Graphics (SIGGRAPH 2022)
 
 ![teaser](https://people.cs.umass.edu/~dliu/projects/ASSET/resources/teaser.png)
 
-### [Project page](https://people.cs.umass.edu/~dliu/projects/ASSET/) |   Paper
+### [Project page](https://people.cs.umass.edu/~dliu/projects/ASSET/) |   [Paper](https://arxiv.org/abs/2205.12231)
 
 
 ## Requirements
